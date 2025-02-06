@@ -1,0 +1,122 @@
+{
+    "Aerial%20view%20of%20Krasnoyarsk%201.jpg": {
+        "dominant_colors": [
+            "#7f8080",
+            "#3f3c2e",
+            "#cbd2d7"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                2272,
+                1704
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Asmara2.jpg": {
+        "dominant_colors": [
+            "#baa180",
+            "#3b3226",
+            "#6b6766"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                1024,
+                683
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Bahrain%20World%20trade%20Center%20.jpg": {
+        "dominant_colors": [
+            "#8c7888",
+            "#382f3a",
+            "#485990"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                2048,
+                1365
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Boston%20Financial%20District%20skyline.jpg": {
+        "dominant_colors": [
+            "#4f96d2",
+            "#3b4750",
+            "#c2c8ce"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                2196,
+                1680
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Marcus%20Aurelius%20Arch%20Tripoli%20Libya.jpg": {
+        "dominant_colors": [
+            "#40402e",
+            "#e1deda",
+            "#8a8575"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                2048,
+                1536
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Nyerere%20Square%20in%20Dodoma.jpg": {
+        "dominant_colors": [
+            "#5a80ac",
+            "#5f4d3b",
+            "#b99f8b"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                4928,
+                3264
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Pointe%20des%20Almadies%20-%20Senegal.jpg": {
+        "dominant_colors": [
+            "#99b2cd",
+            "#38321e",
+            "#697a88"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                3543,
+                2648
+            ],
+            "mode": "RGB"
+        }
+    },
+    "Sao%20Paulo%20Skyline%20in%20Brazil.jpg": {
+        "dominant_colors": [
+            "#c2b6a6",
+            "#303434",
+            "#72716b"
+        ],
+        "metadata": {
+            "format": "JPEG",
+            "size": [
+                1024,
+                682
+            ],
+            "mode": "RGB"
+        }
+    }
+}
