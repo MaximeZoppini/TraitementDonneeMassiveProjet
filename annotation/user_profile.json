@@ -1,0 +1,18 @@
+[
+    {
+        "user_id": 1,
+        "preferred_colors": [
+            "#ff0000",
+            "#00ff00"
+        ],
+        "preferred_orientation": "portrait"
+    },
+    {
+        "user_id": 2,
+        "preferred_colors": [
+            "#0000ff",
+            "#ffff00"
+        ],
+        "preferred_orientation": "landscape"
+    }
+]
