@@ -1,0 +1,134 @@
+## 📝 **README – Système de Recommandation d’Images basé sur les Infrastructures des Grandes Villes**
+
+---
+
+### 🧭 **Introduction**
+
+Ce projet a pour objectif la mise en place d’un **système de recommandation d’images**, construit et commenté en Python.  
+Ce système est conçu pour recommander des images en fonction des **préférences utilisateurs**, en s’appuyant sur les étapes suivantes :
+- **Collecte d’un ensemble d’images** sous licence ouverte
+- **Annotation automatique** à l’aide de métadonnées et d’analyses d’image
+- **Analyse de données** pour modéliser les préférences utilisateurs
+- **Visualisation** des caractéristiques extraites
+- **Recommandation personnalisée**
+- **Tests** fonctionnels
+- Et enfin, la **rédaction d’un rapport clair et structuré**
+
+Conformément aux consignes, toutes les étapes sont **automatisées autant que possible**, et les **métadonnées complètes** sont exploitées à chaque niveau.
+
+Le thème choisi pour ce projet est celui des **infrastructures urbaines des grandes villes**, mettant en valeur des bâtiments, ponts, rues et paysages urbains issus de différentes capitales mondiales, à partir de données ouvertes disponibles via Wikidata.
+
+---
+
+### 🚧 **État actuel du projet**
+
+Le projet est actuellement structuré autour de plusieurs modules fonctionnels répartis dans des notebooks thématiques. Voici les étapes déjà complétées :
+
+#### ✅ Collecte de données
+- Requête SPARQL à **Wikidata** automatisée, permettant de récupérer plus de 100 images représentant les **grandes villes** du monde avec :
+  - Le nom de la ville
+  - Le pays associé
+  - Une image d’infrastructure typique
+- Téléchargement automatique de chaque image dans un dossier local `images/`
+- Génération d’un fichier CSV `images_metadata.csv` contenant toutes les métadonnées disponibles :
+  - URL source
+  - Format de l’image
+  - Taille
+  - Orientation (portrait/paysage)
+  - + métadonnées EXIF quand disponibles (date de capture, appareil, etc.)
+
+#### ✅ Annotation et étiquetage
+- Extraction automatique des **couleurs dominantes** des images à l’aide de **KMeans clustering**.
+- Construction de profils d’images enrichis, incluant :
+  - Caractéristiques visuelles (couleurs, dimensions, format)
+  - Informations contextuelles (ville, pays)
+
+#### ✅ Génération de profils utilisateurs simulés
+- Création automatique d’un ensemble de profils utilisateurs fictifs.
+- Chaque utilisateur est associé à :
+  - Des images “likées” (sélection aléatoire)
+  - Une préférence pour certaines couleurs
+  - Une orientation d’image favorite
+  - Un format de fichier préféré
+
+Les profils sont enregistrés dans un fichier `user_profiles.json`.
+
+#### ✅ Visualisation des données
+- Diagrammes réalisés avec `matplotlib` et `seaborn` :
+  - Distribution des formats d’images
+  - Répartition orientation portrait/paysage
+  - Histogrammes de couleurs dominantes
+
+---
+
+### 🤖 **Algorithmes implémentés**
+
+#### 🟨 Clustering (non supervisé)
+- Utilisation de **KMeans** (Scikit-learn) pour extraire les couleurs dominantes à partir des pixels RGB de chaque image.
+- Résultat : 3 à 5 couleurs représentatives par image, utilisées dans l’analyse et la recommandation.
+
+#### 🟩 Classification (supervisé)
+- Implémentation d’un **algorithme de classification** supervisée basé sur :
+  - Les préférences utilisateurs simulées (images likées vs non-likées)
+  - Les caractéristiques des images (taille, orientation, couleurs moyennes)
+- Utilisation de **RandomForestClassifier** pour prédire si un utilisateur appréciera une image donnée.
+- Le modèle est entraîné sur un jeu de données généré automatiquement et validé par une séparation train/test.
+- Mesure de performance : **précision et matrice de confusion**
+
+---
+
+### 🧠 **Recommandation (en cours de finalisation)**
+
+L’étape suivante consiste à :
+- Croiser les **sorties du classificateur** avec les profils utilisateurs
+- Recommander automatiquement des images nouvelles que l’utilisateur pourrait apprécier
+- Évaluer les résultats selon des critères simples de cohérence (ex. matching couleur, format)
+
+---
+
+### 🔮 **Fonctionnalités à venir**
+
+Les prochaines étapes du projet incluent :
+- Implémentation finale de la logique de **recommandation personnalisée**
+- Ajout de **tests utilisateurs automatisés** pour valider le bon fonctionnement du pipeline
+- **Visualisation personnalisée** des recommandations pour chaque utilisateur
+- Génération du **rapport PDF** synthétisant :
+  - Les choix techniques
+  - La démarche
+  - Les résultats
+  - Les axes d’amélioration
+
+---
+
+### 🏙️ **Thème du projet : Infrastructures urbaines**
+
+Ce projet s’inscrit dans le thème des **grandes villes du monde** et de leurs **infrastructures architecturales**.  
+Les images utilisées sont extraites de **Wikidata** via SPARQL, garantissant une licence libre.  
+Elles représentent :
+- Des bâtiments emblématiques
+- Des ponts, rues, panoramas urbains
+- Des infrastructures visuelles caractéristiques d’un pays ou d’une ville
+
+---
+
+### 📁 **Organisation du projet**
+
+```
+├── images/                        # Images téléchargées depuis Wikidata
+├── data_collection/
+│   └── wikidata_collector.ipynb  # Récupération et sauvegarde des images
+│   └── data_loader.ipynb         # Extraction des métadonnées
+├── annotation/
+│   └── user_profile.ipynb        # Génération des profils utilisateurs
+├── recommendation/
+│   └── classifier.ipynb          # Implémentation du classificateur
+│   └── recommender.ipynb         # Système de recommandation (à finaliser)
+├── notebooks/
+│   └── couleurs.ipynb            # Extraction des couleurs dominantes
+│   └── visualization.ipynb       # Visualisation des données
+│   └── data_analysis.ipynb       # Préparation des données pour l’apprentissage
+├── annotation/
+│   └── user_profiles.json
+├── Projet.ipynb                  # Rapport synthétique en notebook
+└── images_metadata.csv           # Toutes les métadonnées extraites
+```

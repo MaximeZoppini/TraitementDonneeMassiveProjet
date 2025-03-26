@@ -1,0 +1,13 @@
+# Dossiers générés
+images/
+__pycache__/
+.ipynb_checkpoints/
+
+# Fichiers temporaires
+*.csv
+*.json
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
