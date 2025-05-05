@@ -157,3 +157,12 @@ Ce projet a permis de construire une chaîne de traitement complète allant de l
 
 Le projet est à la fois générique, réutilisable, et personnalisable pour des extensions futures (interface utilisateur, vraie base utilisateurs, tags manuels, modèle profond).
 
+
+
+## 12. Lancement du projet
+
+pour tester le projet, la prmière chose est d'avoir docker installé sur le pc.
+via un terminal, aller dans le projet, pusi cd BDD
+puis lancer la ligne suivante:
+lancer le fichier docker-compose.ymls
+docker exec -it postgres-db psql -U user -d db_datamassive

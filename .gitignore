@@ -2,7 +2,7 @@
 images/
 __pycache__/
 .ipynb_checkpoints/
-
+BDD/postgres-data
 # Fichiers temporaires
 *.csv
 *.json
