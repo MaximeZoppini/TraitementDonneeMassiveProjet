@@ -1,213 +1,64 @@
-# README - Projet : Système de Recommandation d'Images Basé sur les Infrastructures Urbaines
+## 🚀 Lancement du projet
 
-## 1. Présentation générale
+Ce projet télécharge des images depuis Wikidata, extrait leurs métadonnées (Exif + Commons), puis les stocke automatiquement dans une base PostgreSQL via des containers Docker.
 
-Ce projet a été réalisé dans le cadre du cours "Traitement de Données Massives". Il s'inscrit dans une démarche complète de création d'un système de recommandation d'images personnalisé, basé sur des métadonnées techniques, des caractéristiques visuelles extraites automatiquement, et des profils utilisateurs simulés.
+---
 
-Le thème choisi porte sur les **infrastructures des grandes villes du monde**, illustrées via des images ouvertes issues de Wikidata. L'ensemble du projet respecte une chaîne de traitement de données massives automatisée, structurée, et modulaire, allant de la collecte à la recommandation.
+### 📦 Étapes de déploiement
 
-L'approche se veut professionnelle, reproductible, et fondée sur des méthodes d'algorithmique avancée.
+1. **Lancer les services Docker (base de données + pgAdmin + build de l'image)**
 
-## 2. Objectifs et démarche pédagogique
-
-L'objectif principal était de mettre en place :
-
-- Un pipeline complet de **traitement automatique des images**
-- Un système d'**annotation enrichie** (visuelle et sémantique)
-- Une modélisation des **préférences utilisateurs**
-- Une **analyse exploratoire** des données visuelles et comportementales
-- L'entraînement d'un **modèle de classification supervisée**
-- Un **moteur de recommandation** personnalisé
-
-Tout en assurant :
-- Une **scalabilité** de la collecte et du traitement
-- L'**automatisation** de toutes les étapes intermediaires
-- Une séparation claire des modules de collecte, d'analyse, de ML et de visualisation
-
-## 3. Collecte des données : Images de grandes villes
-
-La collecte s'effectue automatiquement à l'aide d'une **requête SPARQL** exécutée sur l'endpoint Wikidata. Cette requête permet de récupérer des images d'infrastructures appartenant à des entités de type "grande ville" (`wd:Q1549591`). Pour chaque résultat, on extrait :
-
-- Le nom de la ville
-- Le pays associé
-- Le lien direct de l'image sur Wikimedia Commons
-
-Les images sont automatiquement **téléchargées** dans un dossier `images/`, et un fichier `images_metadata.csv` est généré contenant toutes les métadonnées techniques disponibles :
-
-- Format (JPEG, PNG...)
-- Dimensions (largeur, hauteur)
-- Orientation déduite (portrait, paysage, carré)
-- Appareil photo (EXIF, si disponible)
-- Date de capture (EXIF)
-- Chemin local et URL source
-
-Ce traitement s'effectue en **batch**, avec vérification d'erreurs et contrôle de l'identité client via User-Agent pour respecter les politiques de Wikimedia.
-
-## 4. Annotation des images
-
-Les images collectées sont ensuite **enrichies** automatiquement par analyse du contenu visuel.
-
-- Extraction des **couleurs dominantes** à l'aide de l'algorithme **KMeans** (3 couleurs par image)
-- Attribution possible de **tags simulés** ("ville", "bâtiment", "structure", etc.)
-- Analyse structurelle des métadonnées techniques (format, orientation...)
-
-Ces informations sont regroupées dans un fichier `annotations.json`, de structure :
-
-```json
-{
-  "nom_image.jpg": {
-    "metadata": {
-      "format": "JPEG",
-      "size": [1024, 768],
-      "orientation": "landscape"
-    },
-    "dominant_colors": ["#123456", "#abcdef", "#445566"],
-    "tags": ["ville", "architecture"]
-  }
-}
+```bash
+docker compose up -d
 ```
 
-Ce fichier constitue la base pour les analyses utilisateurs et les systèmes de recommandation.
+Cela :
 
-## 5. Profils utilisateurs simulés
+* Crée le réseau Docker `backend`
+* Lance PostgreSQL (`postgres-db`)
+* Démarre pgAdmin (accessible sur [http://localhost:5050](http://localhost:5050))
+* Construit l'image `image_downloader` prête à être utilisée
 
-Un module génère un ensemble de **profils utilisateurs** avec :
+---
 
-- Un identifiant unique
-- Une liste d'images "aimées"
-- Des préférences inférées :
-  - Couleurs dominantes favoris
-  - Orientation préférée
-  - Format préféré
+3. **Lancer le scheduler (orchestrateur Python)**
 
-Ces profils sont sauvegardés dans un fichier `user_profiles.json`, permettant l'entraînement supervisé d'un modèle.
-
-## 6. Visualisation
-
-Plusieurs notebooks permettent de visualiser :
-
-- La distribution des tailles, formats, orientations
-- Les couleurs dominantes les plus fréquentes
-- Les préférences utilisateurs (sous forme de diagrammes comparés)
-
-Cela facilite l'analyse exploratoire et la justification des choix de modélisation.
-
-## 7. Classification supervisée
-
-Un modèle de classification supervisé a été entraîné pour **prédire si un utilisateur aimera une image**.
-
-- Méthode : **RandomForestClassifier** (scikit-learn)
-- Données : jointure entre `images_metadata.csv`, `annotations.json` et `user_profiles.json`
-- Cibles : 1 si l'image est likée par l'utilisateur, 0 sinon
-- Prétraitement des données : encodage, vectorisation RGB, normalisation
-
-Le modèle est utilisé pour générer des recommandations futures.
-
-## 8. Système de recommandation
-
-Deux approches sont utilisables :
-
-- **Filtrage par contenu** : matching sur couleurs, orientation, format, tags
-- **Prédiction via classifieur** : probabilité d'aimer une image selon profil
-
-Le système renvoie une liste d'images recommandées par utilisateur, stockée pour visualisation et évaluation.
-
-## 9. Organisation du projet
-
-```
-images/                         # Images téléchargées
-images_metadata.csv             # Métadonnées techniques extraites
-annotations.json                # Informations enrichies sur les images
-user_profiles.json              # Profils utilisateurs simulés
-
-/data_collection/
-  wikidata_collector.py         # SPARQL + téléchargement + CSV
-  data_loader.ipynb             # Lecture / préparation des données
-
-/annotation/
-  generate_annotations.py       # Extraction des couleurs + enrichissement JSON
-  user_profile.ipynb            # Création de profils utilisateurs
-
-/recommendation/
-  classifier.ipynb              # Entraînement du modèle
-  recommender.ipynb             # Moteur de recommandation
-
-/notebooks/
-  visualization.ipynb           # Graphiques des données
-
-Projet.ipynb                    # Rapport du projet (résumé)
+```bash
+python scheduler.py
 ```
 
-## 10. Rapport final
+Cela :
 
-Le rapport PDF (non fourni ici) décrit :
+* Lance automatiquement plusieurs containers `image_downloader`
+* Chaque container télécharge une plage d'images et insère les métadonnées dans PostgreSQL
 
-- Les étapes du projet
-- Les sources utilisées (licences libres via Wikidata)
-- Les données collectées et enrichies
-- Les méthodes analytiques et les algorithmes déployés
-- Les résultats et observations clés
-- Les limites rencontrées et axes d'amélioration
+---
 
-Aucune ligne de code n'est incluse dans ce rapport.
+4. **Vérifier les résultats**
 
-## 11. Conclusion
+#### via le terminal :
 
-Ce projet a permis de construire une chaîne de traitement complète allant de la collecte à la recommandation d'images, en passant par l'annotation automatique et l'apprentissage supervisé. Il met en pratique des compétences essentielles en traitement de données massives, apprentissage automatique, et structuration de projets techniques.
-
-Le projet est à la fois générique, réutilisable, et personnalisable pour des extensions futures (interface utilisateur, vraie base utilisateurs, tags manuels, modèle profond).
-
-
-## Lancement du scheduler et stockage dans PostgreSQL
-
-1. **Lancer la base de données PostgreSQL via Docker Compose**
-   Depuis la racine du projet, exécuter :
-
-   ```bash
-   docker compose up -d
-   ```
-
-   > Cela démarre un conteneur PostgreSQL accessible sur le port `5432` avec les identifiants suivants :
-   >
-   > * **Base de données** : `imagedb`
-   > * **Utilisateur** : `user`
-   > * **Mot de passe** : `password`
-
-2. **Créer la table de métadonnées dans PostgreSQL**
-   Connectez-vous à la base (via un client SQL ou `psql`) et exécutez :
-
-   ```sql
-   CREATE TABLE images (
-       id SERIAL PRIMARY KEY,
-       filename TEXT,
-       format TEXT,
-       width INT,
-       height INT,
-       orientation TEXT,
-       capture_date TEXT,
-       device TEXT
-   );
-   ```
-
-3. **Construire l'image Docker `image_downloader`**
-
-   ```bash
-   docker build -f data_collection/Dockerfile.downloader -t image_downloader .
-   ```
-
-4. **Lancer le scheduler**
-
-   ```bash
-   python data_collection/scheduler.py
-   ```
-
-   > Ce script répartit automatiquement le téléchargement des images sur plusieurs conteneurs `image_downloader`, qui extraient les métadonnées et les stockent directement dans PostgreSQL.
-
-
-## 12. Lancement du projet
-
-pour tester le projet, la prmière chose est d'avoir docker installé sur le pc.
-via un terminal, aller dans le projet, pusi cd BDD
-puis lancer la ligne suivante:
-lancer le fichier docker-compose.ymls
+```bash
 docker exec -it postgres-db psql -U user -d db_datamassive
+```
+
+Et dans le prompt SQL :
+
+```sql
+\dt
+SELECT * FROM images LIMIT 5;
+```
+
+---
+
+### 📁 Dossier d’images téléchargées
+
+Les images sont sauvegardées localement dans le dossier `images/`, partagé entre les workers via volume Docker.
+
+---
+
+### 📌 Notes
+
+* Le nom du réseau Docker utilisé est : `traitementdonneemassiveprojet_backend` (défini dans le `docker-compose.yml`)
+* Chaque container `image_downloader` fonctionne de manière autonome et temporaire (`--rm`)
+* Les logs sont allégés pour privilégier la vitesse et la clarté
