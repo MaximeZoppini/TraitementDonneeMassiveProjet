@@ -203,3 +203,11 @@ Le projet est à la fois générique, réutilisable, et personnalisable pour des
 
    > Ce script répartit automatiquement le téléchargement des images sur plusieurs conteneurs `image_downloader`, qui extraient les métadonnées et les stockent directement dans PostgreSQL.
 
+
+## 12. Lancement du projet
+
+pour tester le projet, la prmière chose est d'avoir docker installé sur le pc.
+via un terminal, aller dans le projet, pusi cd BDD
+puis lancer la ligne suivante:
+lancer le fichier docker-compose.ymls
+docker exec -it postgres-db psql -U user -d db_datamassive

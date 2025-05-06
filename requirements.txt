@@ -2,3 +2,5 @@ import json
 import random
 import pandas 
 import matplotlib.pyplot
+import sqlalchemy
+import psycopg2-binary
