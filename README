@@ -157,3 +157,49 @@ Ce projet a permis de construire une chaîne de traitement complète allant de l
 
 Le projet est à la fois générique, réutilisable, et personnalisable pour des extensions futures (interface utilisateur, vraie base utilisateurs, tags manuels, modèle profond).
 
+
+## Lancement du scheduler et stockage dans PostgreSQL
+
+1. **Lancer la base de données PostgreSQL via Docker Compose**
+   Depuis la racine du projet, exécuter :
+
+   ```bash
+   docker compose up -d
+   ```
+
+   > Cela démarre un conteneur PostgreSQL accessible sur le port `5432` avec les identifiants suivants :
+   >
+   > * **Base de données** : `imagedb`
+   > * **Utilisateur** : `user`
+   > * **Mot de passe** : `password`
+
+2. **Créer la table de métadonnées dans PostgreSQL**
+   Connectez-vous à la base (via un client SQL ou `psql`) et exécutez :
+
+   ```sql
+   CREATE TABLE images (
+       id SERIAL PRIMARY KEY,
+       filename TEXT,
+       format TEXT,
+       width INT,
+       height INT,
+       orientation TEXT,
+       capture_date TEXT,
+       device TEXT
+   );
+   ```
+
+3. **Construire l'image Docker `image_downloader`**
+
+   ```bash
+   docker build -f data_collection/Dockerfile.downloader -t image_downloader .
+   ```
+
+4. **Lancer le scheduler**
+
+   ```bash
+   python data_collection/scheduler.py
+   ```
+
+   > Ce script répartit automatiquement le téléchargement des images sur plusieurs conteneurs `image_downloader`, qui extraient les métadonnées et les stockent directement dans PostgreSQL.
+
