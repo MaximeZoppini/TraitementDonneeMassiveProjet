@@ -11,8 +11,10 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ../postgres-data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
 
   pgadmin:
     image: dpage/pgadmin4
@@ -24,3 +26,21 @@ services:
       - "5050:80"
     depends_on:
       - db
+    networks:
+      - backend
+
+  downloader_base:
+    build:
+      context: /data_collection 
+      dockerfile: Dockerfile.downloader
+    image: image_downloader
+    networks:
+      - backend
+    volumes:
+      - ../images:/app/images
+
+networks:
+  backend:
+
+volumes:
+  postgres-data:
