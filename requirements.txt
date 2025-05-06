@@ -1,6 +1,9 @@
-import json
-import random
-import pandas 
-import matplotlib.pyplot
-import sqlalchemy
-import psycopg2-binary
+json
+random
+pandas
+matplotlib.pyplot
+sqlalchemy
+psycopg2-binar
+requests
+pillow
+tqdm
