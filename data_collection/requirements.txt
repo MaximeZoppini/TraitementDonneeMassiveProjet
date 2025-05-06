@@ -1,3 +1,6 @@
 requests
+pandas
 pillow
+sqlalchemy
 tqdm
+psycopg2-binary
