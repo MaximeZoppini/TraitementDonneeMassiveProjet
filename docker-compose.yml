@@ -31,13 +31,27 @@ services:
 
   downloader_base:
     build:
-      context: /data_collection 
+      context: ./data_collection 
       dockerfile: Dockerfile.downloader
     image: image_downloader
     networks:
       - backend
     volumes:
       - ../images:/app/images
+
+  flask_api:
+    build:
+      context: ./flask_api
+      dockerfile: Dockerfile
+    container_name: flask-api
+    ports:
+      - "5080:5000"
+    networks:
+      - backend
+    volumes:
+      - ../images:/app/images
+    depends_on:
+      - db
 
 networks:
   backend:

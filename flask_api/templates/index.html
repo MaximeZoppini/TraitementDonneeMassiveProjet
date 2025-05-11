@@ -1,0 +1,25 @@
+<!-- flask_api/templates/index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Images téléchargées</title>
+</head>
+<body>
+    <h1>Liste des images</h1>
+    <ul id="image-list"></ul>
+
+    <script>
+        fetch('/images')
+            .then(res => res.json())
+            .then(images => {
+                const list = document.getElementById('image-list');
+                images.forEach(img => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="./images/${img}" target="_blank">${img}</a>`;
+                    list.appendChild(li);
+                });
+            });
+    </script>
+</body>
+</html>
