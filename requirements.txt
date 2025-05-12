@@ -1,6 +1,9 @@
-import json
-import random
-import pandas 
-import matplotlib.pyplot
-import sqlalchemy
-import psycopg2-binary
+requests
+pandas
+pillow
+sqlalchemy
+tqdm
+psycopg2-binary
+scikit-learn
+opencv-python-headless
+netcat

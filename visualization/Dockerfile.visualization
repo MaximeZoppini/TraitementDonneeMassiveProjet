@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+COPY visualization/data_analysis.py .
+COPY visualization/visualization.py .
+
+COPY config.py .
+
+RUN mkdir -p output
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["sh", "-c", "python data_analysis.py && python visualization.py"]

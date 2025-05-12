@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.9"
 
 services:
   db:
@@ -11,8 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ../postgres-data:/var/lib/postgresql/data
-      - ./init:/docker-entrypoint-initdb.d
+      - ./postgres-data:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -31,16 +30,78 @@ services:
 
   downloader_base:
     build:
-      context: /data_collection 
-      dockerfile: Dockerfile.downloader
+      context: .
+      dockerfile: data_collection/Dockerfile.downloader
     image: image_downloader
     networks:
       - backend
+    depends_on:
+      - db
     volumes:
-      - ../images:/app/images
+      - ./images:/app/images
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+      - ./config.py:/app/config.py:ro
+    entrypoint: ["/wait-for-it.sh", "db:5432", "--", "python", "image_downloader.py"]
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASS: pass
+      DB_NAME: db_datamassive
+
+  annotation:
+    build:
+      context: .
+      dockerfile: annotation/Dockerfile.annotations
+    networks:
+      - backend
+    depends_on:
+      - db
+    volumes:
+      - ./images:/app/images
+      - ./config.py:/app/config.py:ro
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASS: pass
+      DB_NAME: db_datamassive
+
+  recommender:
+    build:
+      context: .
+      dockerfile: recommender/Dockerfile.recommender
+    networks:
+      - backend
+    depends_on:
+      - db
+    volumes:
+      - ./images:/app/images
+      - ./annotations.json:/app/annotations.json
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASS: pass
+      DB_NAME: db_datamassive
+
+  visualization:
+    build:
+      context: .
+      dockerfile: visualization/Dockerfile.visualization
+    depends_on:
+      - db
+    networks:
+      - backend
+    volumes:
+      - ./visualization/output:/app/output
+      - ./config.py:/app/config.py:ro
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASS: pass
+      DB_NAME: db_datamassive
 
 networks:
   backend:
-
-volumes:
-  postgres-data:

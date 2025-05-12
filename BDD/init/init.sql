@@ -20,5 +20,15 @@ CREATE TABLE IF NOT EXISTS images (
   url TEXT,
   width INT,
   height INT,
+  orientation TEXT,
+  format TEXT,
+  dominant_colors TEXT[],
+  device TEXT,
+  capture_date TEXT,
+  iso TEXT,
+  focal_length TEXT,
+  exposure_time TEXT,
+  gps JSONB,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+

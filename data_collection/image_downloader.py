@@ -5,20 +5,31 @@ from PIL import Image, ExifTags
 from io import BytesIO
 from tqdm import tqdm
 from sqlalchemy import create_engine
-from wikidata_utils import build_sparql_query, run_sparql_query
+from config import DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME
 
-# Dossier dans le container
-IMAGE_DIR = "images"
+# Configuration
+SPARQL_ENDPOINT = "https://query.wikidata.org/sparql"
+IMAGE_DIR = "/app/images"
+HEADERS = {"User-Agent": "MassiveDataProject/1.0 (cmvilleroy@gmail.com)"}
+TABLE_NAME = "images"
+
 os.makedirs(IMAGE_DIR, exist_ok=True)
 
-HEADERS = {"User-Agent": "MassiveDataProject/1.0 (cmvilleroy@gmail.com)"}
+def build_sparql_query(limit=10):
+    return f"""
+    SELECT DISTINCT ?ville ?villeLabel ?pays ?paysLabel ?image WHERE {{
+      ?ville wdt:P31 wd:Q1549591;
+             wdt:P17 ?pays;
+             wdt:P18 ?image.
+      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "fr". }}
+    }}
+    LIMIT {limit}
+    """
 
-DB_USER = "user"
-DB_PASS = "pass"
-DB_HOST = "db"  # ATTENTION : ici on utilise le nom du service Docker
-DB_PORT = "5432"
-DB_NAME = "db_datamassive"
-TABLE_NAME = "images"
+def run_sparql_query(query):
+    response = requests.get(SPARQL_ENDPOINT, params={"query": query, "format": "json"}, headers=HEADERS)
+    response.raise_for_status()
+    return response.json()["results"]["bindings"]
 
 def download_image(url, filename):
     try:
@@ -31,17 +42,13 @@ def download_image(url, filename):
                     f.write(chunk)
         return image_path
     except Exception as e:
-        print(f"Erreur lors du téléchargement : {url} | {e}")
+        print(f"[✘] Erreur téléchargement {url} : {e}")
         return None
 
 def get_image_metadata(image_path):
     metadata = {
-        "format": None,
-        "width": None,
-        "height": None,
-        "orientation": None,
-        "capture_date": None,
-        "device": None
+        "format": None, "width": None, "height": None,
+        "orientation": None, "capture_date": None, "device": None
     }
     try:
         with Image.open(image_path) as img:
@@ -60,7 +67,7 @@ def get_image_metadata(image_path):
                 model = exif.get("Model", "")
                 metadata["device"] = f"{make} {model}".strip()
     except Exception as e:
-        print(f"Erreur lecture métadonnées {image_path} : {e}")
+        print(f"[!] Erreur métadonnées {image_path} : {e}")
     return metadata
 
 def get_commons_metadata(file_url):
@@ -86,20 +93,19 @@ def get_commons_metadata(file_url):
             "description": meta.get("ImageDescription", {}).get("value", "")
         }
     except Exception as e:
-        print(f"Erreur Wikimedia metadata : {e}")
+        print(f"[!] Erreur Wikimedia metadata : {e}")
         return {
-            "author": "",
-            "license": "",
-            "description": ""
+            "author": "", "license": "", "description": ""
         }
 
 def process_images(limit=10):
+    print(f"[→] Téléchargement de {limit} images et insertion dans la BDD.")
     query = build_sparql_query(limit)
     results = run_sparql_query(query)
-
+    
     all_rows = []
 
-    for entry in tqdm(results, desc="Téléchargement et insertion"):
+    for entry in tqdm(results, desc="Traitement"):
         ville = entry["villeLabel"]["value"]
         pays = entry["paysLabel"]["value"]
         image_url = entry["image"]["value"]
@@ -128,7 +134,7 @@ def process_images(limit=10):
     engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     df = pd.DataFrame(all_rows)
     df.to_sql(TABLE_NAME, engine, if_exists="append", index=False)
-    print(f"Insertion de {len(df)} lignes dans la table '{TABLE_NAME}' réussie.")
+    print(f"{len(df)} images insérées dans la table '{TABLE_NAME}'.")
 
 # Lancement
 if __name__ == "__main__":
