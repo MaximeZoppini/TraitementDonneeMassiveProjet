@@ -11,10 +11,15 @@ from config import DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
 engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 df = pd.read_sql("SELECT image_filename, orientation, dominant_colors FROM images", engine)
 
+
 df = df[df["dominant_colors"].notnull()]
 df["colors"] = df["dominant_colors"].apply(lambda c: eval(c) if isinstance(c, str) else [])
 
 df = df[df["colors"].map(len) > 0]
+
+if df.empty:
+    print("Le DataFrame est vide après le filtrage, arrêt du script.")
+    exit(1)
 
 mlb = MultiLabelBinarizer()
 X_colors = mlb.fit_transform(df["colors"])

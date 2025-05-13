@@ -11,6 +11,12 @@ COPY config.py .
 
 RUN mkdir -p output
 
+COPY /wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
+# ✅ Installer netcat (nécessaire pour wait-for-it.sh)
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["sh", "-c", "python data_analysis.py && python visualization.py"]
+ENTRYPOINT ["/wait-for-it.sh", "db", "5432", "--", "sh", "-c", "python data_analysis.py && python visualization.py"]

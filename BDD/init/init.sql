@@ -13,18 +13,24 @@ $do$;
 
 -- Connexion à la base et création de la table
 \connect db_datamassive
+DROP TABLE IF EXISTS images;
 
 CREATE TABLE IF NOT EXISTS images (
   id SERIAL PRIMARY KEY,
-  filename TEXT NOT NULL,
-  url TEXT,
+  ville TEXT,
+  pays TEXT,
+  image_url TEXT,
+  image_filename TEXT,
+  format TEXT,
   width INT,
   height INT,
   orientation TEXT,
-  format TEXT,
-  dominant_colors TEXT[],
-  device TEXT,
   capture_date TEXT,
+  device TEXT,
+  author TEXT,
+  license TEXT,
+  description TEXT,
+  dominant_colors TEXT[],
   iso TEXT,
   focal_length TEXT,
   exposure_time TEXT,
@@ -32,3 +38,5 @@ CREATE TABLE IF NOT EXISTS images (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE images 
+ALTER COLUMN dominant_colors TYPE TEXT;

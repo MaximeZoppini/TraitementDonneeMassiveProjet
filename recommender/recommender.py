@@ -38,7 +38,22 @@ def extract_first_rgb(color_string):
     except:
         return 0, 0, 0
 
-df[["r", "g", "b"]] = df["dominant_colors"].apply(lambda c: pd.Series(extract_first_rgb(c)))
+
+def safe_rgb(color_str):
+    try:
+        colors = color_str.split(",")  # car on a enregistré "#a,#b,#c"
+        rgb = [tuple(int(color[i:i+2], 16) for i in (1, 3, 5)) for color in colors]
+        # moyenne des composantes RGB
+        r = int(sum(c[0] for c in rgb) / len(rgb))
+        g = int(sum(c[1] for c in rgb) / len(rgb))
+        b = int(sum(c[2] for c in rgb) / len(rgb))
+        return pd.Series([r, g, b])
+    except Exception as e:
+        print(f"[recommender] Erreur parsing RGB : {e} ({color_str})")
+        return pd.Series([0, 0, 0])
+    
+    
+df[["r", "g", "b"]] = df["dominant_colors"].apply(safe_rgb)
 
 # Clustering
 features = df[["width", "height", "orientation_code", "r", "g", "b"]].fillna(0)

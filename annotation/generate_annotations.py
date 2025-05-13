@@ -7,7 +7,7 @@ from PIL import Image, ExifTags
 from sqlalchemy import create_engine, text
 from sklearn.cluster import KMeans
 from config import DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
-
+from urllib.parse import unquote
 IMAGE_FOLDER = "images"
 ANNOTATION_FILE = "annotations.json"
 
@@ -15,7 +15,30 @@ os.makedirs(IMAGE_FOLDER, exist_ok=True)
 
 # Connexion à la base de données
 engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
-df_images = pd.read_sql("SELECT filename FROM images", engine)
+import time
+
+# Attendre que des images soient bien présentes dans la base
+def wait_for_images():
+    while True:
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT COUNT(*) FROM images"))
+
+                count = result.scalar()
+                if count > 0:
+                    print(f"[annotation] {count} images trouvées dans la base.")
+                    break
+                else:
+                    print("[annotation] En attente d'images dans la base...")
+        except Exception as e:
+            print(f"[annotation] Erreur en vérifiant la base : {e}")
+        time.sleep(2)
+
+wait_for_images()
+
+print("[annotation] Lecture des noms de fichiers d'images depuis la base...")
+df_images = pd.read_sql("SELECT image_filename FROM images", engine)
+print(f"[annotation] Images à traiter : {df_images.shape[0]}")
 
 def convert_to_serializable(obj):
     try:
@@ -68,7 +91,7 @@ def get_dominant_colors(image_path, num_colors=3):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (200, 200))
     pixels = img.reshape(-1, 3)
-    kmeans = KMeans(n_clusters=num_colors, n_init='auto', random_state=42).fit(pixels)
+    kmeans = KMeans(n_clusters=num_colors, n_init=10, random_state=42).fit(pixels)
     return ["#{:02x}{:02x}{:02x}".format(int(r), int(g), int(b)) for r, g, b in kmeans.cluster_centers_]
 
 def get_image_metadata(image_path):
@@ -90,8 +113,8 @@ def get_image_metadata(image_path):
 def process_images():
     annotations = {}
 
-    for filename in df_images["filename"]:
-        image_path = os.path.join(IMAGE_FOLDER, filename)
+    for filename in df_images["image_filename"]:
+        image_path = os.path.join(IMAGE_FOLDER, unquote(filename))
 
         if not os.path.exists(image_path):
             print(f"[!] Image non trouvée : {filename}")
@@ -108,10 +131,13 @@ def process_images():
             # Mise à jour dans la base de données
             with engine.connect() as conn:
                 conn.execute(
-                    text("UPDATE images SET dominant_colors = :colors WHERE filename = :fname"),
-                    {"colors": json.dumps(dominant_colors), "fname": filename}
-                )
-
+                    text("UPDATE images SET dominant_colors = :colors WHERE image_filename = :fname"),
+                    {
+                        "colors": ','.join(dominant_colors),  # convertit en chaîne "#aaa,#bbb,#ccc"
+                        "fname": filename
+                    }
+                    print(f"[annotation] Mise à jour en base réussie pour {filename}")
+)
             annotations[filename] = {
                 "dominant_colors": dominant_colors,
                 "metadata": metadata

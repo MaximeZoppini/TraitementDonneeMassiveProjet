@@ -3,13 +3,17 @@ FROM python:3.10-slim
 WORKDIR /app
 
 COPY requirements.txt .
-
 COPY annotation/*.py .
+COPY config.py .
 
-COPY config.py . 
-
-RUN apt-get update && apt-get install -y python3-opencv
+# Installer netcat et opencv
+RUN apt-get update && apt-get install -y \
+    python3-opencv \
+    netcat-openbsd
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python", "generate_annotations.py"]
+COPY /wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
+ENTRYPOINT ["/wait-for-it.sh", "db", "5432", "--", "python", "generate_annotations.py"]

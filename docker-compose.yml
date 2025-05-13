@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+      - ./BDD/init:/docker-entrypoint-initdb.d
+
     networks:
       - backend
 
@@ -39,9 +41,8 @@ services:
       - db
     volumes:
       - ./images:/app/images
-      - ./wait-for-it.sh:/wait-for-it.sh:ro
       - ./config.py:/app/config.py:ro
-    entrypoint: ["/wait-for-it.sh", "db:5432", "--", "python", "image_downloader.py"]
+    entrypoint: ["/wait-for-it.sh", "db", "5432", "--", "python", "image_downloader.py"]
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -57,8 +58,9 @@ services:
       - backend
     depends_on:
       - db
+      - downloader_base
     volumes:
-      - ./images:/app/images
+      - images-volume:/app/images
       - ./config.py:/app/config.py:ro
     environment:
       DB_HOST: db
@@ -66,6 +68,8 @@ services:
       DB_USER: user
       DB_PASS: pass
       DB_NAME: db_datamassive
+    entrypoint: ["/wait-for-it.sh", "db", "5432", "--", "python", "generate_annotations.py"]
+    restart: on-failure
 
   recommender:
     build:
@@ -84,6 +88,8 @@ services:
       DB_USER: user
       DB_PASS: pass
       DB_NAME: db_datamassive
+    entrypoint: ["/wait-for-it.sh", "db", "5432", "--", "python", "recommender.py"]
+    restart: on-failure
 
   visualization:
     build:
@@ -102,6 +108,10 @@ services:
       DB_USER: user
       DB_PASS: pass
       DB_NAME: db_datamassive
+    entrypoint: ["/wait-for-it.sh", "db", "5432", "--", "python", "data_analysis.py"]
+    restart: on-failure
 
 networks:
   backend:
+volumes:
+  images-volume:

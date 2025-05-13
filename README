@@ -6,20 +6,13 @@ Ce projet télécharge des images depuis Wikidata, extrait leurs métadonnées (
 
 ### 📦 Étapes de déploiement
 
-1. **Lancer les services Docker (base de données + pgAdmin + build de l'image)**
+1. **Lancer les services Docker (base de données + pgAdmin + build des images)**
 
-```bash
-docker compose up -d
-```
 
-Cela :
-
-* Crée le réseau Docker `backend`
-* Lance PostgreSQL (`postgres-db`)
-* Démarre pgAdmin (accessible sur [http://localhost:5050](http://localhost:5050))
-* Construit l'image `image_downloader` prête à être utilisée
-
----
+docker compose down -v           # Arrête et supprime les volumes (reset complet de la BDD)
+docker system prune -f           # Supprime les ressources Docker inutilisées (optionnel mais utile)
+docker compose build             # Reconstruit les images Docker
+docker compose up --build        # Relance les containers avec rebuild
 
 3. **Lancer le scheduler (orchestrateur Python)**
 

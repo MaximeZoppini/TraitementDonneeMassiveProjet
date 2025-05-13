@@ -133,6 +133,10 @@ def process_images(limit=10):
 
     engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     df = pd.DataFrame(all_rows)
+    # juste avant d’insérer dans la DB
+    for col in df.select_dtypes(include='object'):
+        df[col] = df[col].str.replace('\x00', '', regex=False)
+
     df.to_sql(TABLE_NAME, engine, if_exists="append", index=False)
     print(f"{len(df)} images insérées dans la table '{TABLE_NAME}'.")
 
